@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 class CategoryController extends Controller
 {
@@ -102,5 +104,239 @@ class CategoryController extends Controller
         $this->saveCategories($request, $categories);
 
         return redirect()->route('admin.category.index')->with('success', 'Category deleted successfully');
+    }
+
+    // ==================== API METHODS ====================
+
+    // API: Get all categories
+    public function apiIndex(): JsonResponse
+    {
+        try {
+            $categories = Category::with('products')->get();
+            
+            $categoriesData = $categories->map(function ($category) {
+                return [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                    'description' => $category->description,
+                    'status' => $category->status,
+                    'products_count' => $category->products->count(),
+                    'created_at' => $category->created_at->format('Y-m-d H:i:s'),
+                    'updated_at' => $category->updated_at->format('Y-m-d H:i:s'),
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Categories retrieved successfully',
+                'data' => $categoriesData
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve categories',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // API: Get single category
+    public function apiShow($id): JsonResponse
+    {
+        try {
+            $category = Category::with('products')->findOrFail($id);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Category retrieved successfully',
+                'data' => [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                    'description' => $category->description,
+                    'status' => $category->status,
+                    'products_count' => $category->products->count(),
+                    'created_at' => $category->created_at->format('Y-m-d H:i:s'),
+                    'updated_at' => $category->updated_at->format('Y-m-d H:i:s'),
+                ]
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Category not found'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve category',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // API: Create new category
+    public function apiStore(Request $request): JsonResponse
+    {
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255|unique:categories,name',
+                'description' => 'nullable|string',
+                'status' => 'nullable|in:active,inactive'
+            ]);
+
+            $category = Category::create([
+                'name' => $request->name,
+                'description' => $request->description,
+                'status' => $request->status ?? 'active'
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Category created successfully',
+                'data' => [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                    'description' => $category->description,
+                    'status' => $category->status,
+                    'products_count' => 0,
+                    'created_at' => $category->created_at->format('Y-m-d H:i:s'),
+                    'updated_at' => $category->updated_at->format('Y-m-d H:i:s'),
+                ]
+            ], 201);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create category',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // API: Update category
+    public function apiUpdate(Request $request, $id): JsonResponse
+    {
+        try {
+            $category = Category::findOrFail($id);
+
+            $request->validate([
+                'name' => 'required|string|max:255|unique:categories,name,' . $id,
+                'description' => 'nullable|string',
+                'status' => 'nullable|in:active,inactive'
+            ]);
+
+            $category->update([
+                'name' => $request->name,
+                'description' => $request->description,
+                'status' => $request->status ?? $category->status
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Category updated successfully',
+                'data' => [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                    'description' => $category->description,
+                    'status' => $category->status,
+                    'products_count' => $category->products->count(),
+                    'created_at' => $category->created_at->format('Y-m-d H:i:s'),
+                    'updated_at' => $category->updated_at->format('Y-m-d H:i:s'),
+                ]
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Category not found'
+            ], 404);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update category',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // API: Delete category
+    public function apiDestroy($id): JsonResponse
+    {
+        try {
+            $category = Category::findOrFail($id);
+
+            // Check if category has products
+            if ($category->products()->count() > 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot delete category. It has associated products.'
+                ], 400);
+            }
+
+            $category->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Category deleted successfully'
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Category not found'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete category',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // API: Toggle category status
+    public function apiToggleStatus($id): JsonResponse
+    {
+        try {
+            $category = Category::findOrFail($id);
+            
+            $newStatus = $category->status === 'active' ? 'inactive' : 'active';
+            $category->update(['status' => $newStatus]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Category status updated successfully',
+                'data' => [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                    'status' => $category->status,
+                ]
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Category not found'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update category status',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }
