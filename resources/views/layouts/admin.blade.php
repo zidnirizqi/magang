@@ -48,8 +48,6 @@
         <a href="{{ route('dashboard') }}">🏠 Dashboard</a>
         <a href="{{ route('admin.shop.index') }}">🛒 Shop Product</a>
         <a href="{{ route('admin.category.index') }}">📂 Category</a>
-        <a href="{{ route('admin.brand.index') }}">🏷 Brand</a>
-        <a href="{{ route('admin.pages.index') }}">📄 Pages</a>
         <a href="{{ route('admin.user.index') }}">👤 Users</a>
         <a href="{{ route('admin.profile.index') }}">⚙️ Profile</a>
         

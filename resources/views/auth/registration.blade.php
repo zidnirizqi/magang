@@ -32,47 +32,72 @@
             </div>
             <h2 class="fs-6 fw-normal text-center text-secondary mb-4">Sign up to your account</h2>
             
-            <div id="alertMessage"></div>
+            @if (session('error'))
+              <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              </div>
+            @endif
 
-            <form id="registerForm">
+            @if (session('success'))
+              <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              </div>
+            @endif
+
+            <form method="POST" action="{{ route('register.post') }}">
+              @csrf
+
               <div class="row gy-2 overflow-hidden">
                 <div class="col-12">
                   <div class="form-floating mb-3">
-                    <input type="text" class="form-control" name="name" id="name" placeholder="Your Name" required>
+                    <input type="text" class="form-control @error('name') is-invalid @enderror" 
+                           name="name" id="name" value="{{ old('name') }}" placeholder="Your Name" required>
                     <label for="name" class="form-label">{{ __('Name') }}</label>
                   </div>
-                  <div class="invalid-feedback" id="nameError"></div>
+                  @error('name')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                  @enderror
                 </div>
 
                 <div class="col-12">
                   <div class="form-floating mb-3">
-                    <input type="email" class="form-control" name="email" id="email" placeholder="name@example.com" required>
+                    <input type="email" class="form-control @error('email') is-invalid @enderror" 
+                           name="email" id="email" value="{{ old('email') }}" placeholder="name@example.com" required>
                     <label for="email" class="form-label">{{ __('Email Address') }}</label>
                   </div>
-                  <div class="invalid-feedback" id="emailError"></div>
+                  @error('email')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                  @enderror
                 </div>
 
                 <div class="col-12">
                   <div class="form-floating mb-3">
-                    <input type="password" class="form-control" name="password" id="password" placeholder="Password" required>
+                    <input type="password" class="form-control @error('password') is-invalid @enderror" 
+                           name="password" id="password" placeholder="Password" required>
                     <label for="password" class="form-label">{{ __('Password') }}</label>
                   </div>
-                  <div class="invalid-feedback" id="passwordError"></div>
+                  @error('password')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                  @enderror
                 </div>
 
                 <div class="col-12">
                   <div class="form-floating mb-3">
-                    <input type="password" class="form-control" name="password_confirmation" id="password_confirmation" placeholder="Confirm Password" required>
+                    <input type="password" class="form-control @error('password_confirmation') is-invalid @enderror" 
+                           name="password_confirmation" id="password_confirmation" placeholder="Confirm Password" required>
                     <label for="password_confirmation" class="form-label">{{ __('Confirm Password') }}</label>
                   </div>
-                  <div class="invalid-feedback" id="passwordConfirmationError"></div>
+                  @error('password_confirmation')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                  @enderror
                 </div>
 
                 <div class="col-12">
                   <div class="d-grid my-3">
-                    <button class="btn btn-primary btn-lg" type="submit" id="registerBtn">
-                      <span id="btnText">{{ __('Register') }}</span>
-                      <span id="btnSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    <button class="btn btn-primary btn-lg" type="submit">
+                      {{ __('Register') }}
                     </button>
                   </div>
                 </div>
@@ -91,98 +116,6 @@
     </div>
   </div>
 </section>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-$(document).ready(function() {
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    });
-
-    $('#registerForm').on('submit', function(e) {
-        e.preventDefault();
-        
-        // Reset errors
-        $('.form-control').removeClass('is-invalid');
-        $('.invalid-feedback').text('').hide();
-        $('#alertMessage').html('');
-        
-        // Show loading
-        $('#registerBtn').prop('disabled', true);
-        $('#btnText').addClass('d-none');
-        $('#btnSpinner').removeClass('d-none');
-        
-        const formData = {
-            name: $('#name').val(),
-            email: $('#email').val(),
-            password: $('#password').val(),
-            password_confirmation: $('#password_confirmation').val()
-        };
-        
-        $.ajax({
-            url: '/api/register',
-            type: 'POST',
-            data: formData,
-            success: function(response) {
-                if(response.success) {
-                    // Save token to localStorage
-                    localStorage.setItem('auth_token', response.data.token);
-                    localStorage.setItem('user', JSON.stringify(response.data.user));
-                    
-                    $('#alertMessage').html(
-                        '<div class="alert alert-success alert-dismissible fade show" role="alert">' +
-                        response.message +
-                        '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
-                        '</div>'
-                    );
-                    
-                    // Redirect to dashboard
-                    setTimeout(function() {
-                        window.location.href = '/dashboard';
-                    }, 1000);
-                }
-            },
-            error: function(xhr) {
-                $('#registerBtn').prop('disabled', false);
-                $('#btnText').removeClass('d-none');
-                $('#btnSpinner').addClass('d-none');
-                
-                if(xhr.status === 422) {
-                    // Validation errors
-                    const errors = xhr.responseJSON.errors;
-                    if(errors.name) {
-                        $('#name').addClass('is-invalid');
-                        $('#nameError').text(errors.name[0]).show();
-                    }
-                    if(errors.email) {
-                        $('#email').addClass('is-invalid');
-                        $('#emailError').text(errors.email[0]).show();
-                    }
-                    if(errors.password) {
-                        $('#password').addClass('is-invalid');
-                        $('#passwordError').text(errors.password[0]).show();
-                    }
-                    if(errors.password_confirmation) {
-                        $('#password_confirmation').addClass('is-invalid');
-                        $('#passwordConfirmationError').text(errors.password_confirmation[0]).show();
-                    }
-                } else {
-                    // Other errors
-                    const message = xhr.responseJSON?.message || 'Registration failed. Please try again.';
-                    $('#alertMessage').html(
-                        '<div class="alert alert-danger alert-dismissible fade show" role="alert">' +
-                        message +
-                        '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
-                        '</div>'
-                    );
-                }
-            }
-        });
-    });
-});
-</script>
 
 </body>
 </html>

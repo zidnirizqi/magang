@@ -7,11 +7,13 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\BrandController;
+use App\Http\Controllers\HomeController;
 
-
-Route::get('/', function () {
-    return redirect()->route('login'); // langsung redirect ke login
-});
+// Public Routes - Landing Page
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/products', [HomeController::class, 'products'])->name('products');
+Route::get('/product/{id}', [HomeController::class, 'productDetail'])->name('product.detail');
+Route::get('/category/{id}', [HomeController::class, 'category'])->name('category');
 
 // Auth
 Route::get('login', [AuthController::class, 'index'])->name('login');
@@ -51,13 +53,13 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/category/{id}', [CategoryController::class, 'update'])->name('category.update');
         Route::delete('/category/{id}', [CategoryController::class, 'destroy'])->name('category.destroy');
 
-        // Brand (dummy view)
-        Route::get('/brand', [BrandController::class, 'index'])->name('brand.index');
-        Route::get('/brand/create', [BrandController::class, 'create'])->name('brand.create');
-        Route::post('/brand', [BrandController::class, 'store'])->name('brand.store');
-        Route::get('/brand/{id}/edit', [BrandController::class, 'edit'])->name('brand.edit');
-        Route::put('/brand/{id}', [BrandController::class, 'update'])->name('brand.update');
-        Route::delete('/brand/{id}', [BrandController::class, 'destroy'])->name('brand.destroy');
+        // Brand (dummy view) - DISABLED
+        // Route::get('/brand', [BrandController::class, 'index'])->name('brand.index');
+        // Route::get('/brand/create', [BrandController::class, 'create'])->name('brand.create');
+        // Route::post('/brand', [BrandController::class, 'store'])->name('brand.store');
+        // Route::get('/brand/{id}/edit', [BrandController::class, 'edit'])->name('brand.edit');
+        // Route::put('/brand/{id}', [BrandController::class, 'update'])->name('brand.update');
+        // Route::delete('/brand/{id}', [BrandController::class, 'destroy'])->name('brand.destroy');
 
         // Users (pakai resource biar lengkap CRUD)
         Route::resource('user', UserController::class);
@@ -67,13 +69,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
 
-        // Pages (dummy)
-        Route::get('/pages', function () {
-            return view('admin.pages.index');
-        })->name('pages.index');
+        // Pages (dummy) - DISABLED
+        // Route::get('/pages', function () {
+        //     return view('admin.pages.index');
+        // })->name('pages.index');
 
-        Route::get('/pages/create', function () {
-            return view('admin.pages.create');
-        })->name('pages.create');
+        // Route::get('/pages/create', function () {
+        //     return view('admin.pages.create');
+        // })->name('pages.create');
     });
 });
