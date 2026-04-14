@@ -69,48 +69,84 @@
             @csrf
             <div class="row g-3">
               <div class="col-md-6">
-                <label class="form-label">Product Name</label>
-                <input type="text" name="name" class="form-control" required>
+                <label for="name" class="form-label">Product Name *</label>
+                <input type="text" name="name" id="name" class="form-control @error('name') is-invalid @enderror" 
+                       value="{{ old('name') }}" placeholder="Enter product name" required>
+                @error('name')
+                  <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
               </div>
               <div class="col-md-6">
-                <label for="category" class="form-label">Category</label>
-                <input type="text" 
-                       class="form-control @error('category') is-invalid @enderror" 
-                       id="category" 
-                       name="category" 
-                       value="{{ old('category', $product->category ?? '') }}" 
-                       placeholder="Tulis kategori produk" required>
-                @error('category')
+                <label for="category_id" class="form-label">Category *</label>
+                <select name="category_id" id="category_id" class="form-select @error('category_id') is-invalid @enderror" required>
+                  <option value="">Select Category</option>
+                  @foreach($categories as $category)
+                    <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                      {{ $category->name }}
+                    </option>
+                  @endforeach
+                </select>
+                @error('category_id')
                   <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
               </div>              
               <div class="col-md-6">
-                <label class="form-label">Price</label>
-                <input type="number" name="price" class="form-control" required>
+                <label for="price" class="form-label">Price (Rp) *</label>
+                <input type="number" name="price" id="price" class="form-control @error('price') is-invalid @enderror" 
+                       value="{{ old('price') }}" placeholder="0" min="0" step="1000" required>
+                @error('price')
+                  <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
               </div>
               <div class="col-md-6">
-                <label class="form-label">Stock</label>
-                <input type="number" name="stock" class="form-control" required>
+                <label for="stock" class="form-label">Stock Quantity *</label>
+                <input type="number" name="stock" id="stock" class="form-control @error('stock') is-invalid @enderror" 
+                       value="{{ old('stock') }}" placeholder="0" min="0" required>
+                @error('stock')
+                  <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
               </div>
               <div class="col-md-6">
-                <label class="form-label">Status</label>
-                <select name="status" class="form-select">
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
+                <label for="status" class="form-label">Status *</label>
+                <select name="status" id="status" class="form-select @error('status') is-invalid @enderror" required>
+                  <option value="active" {{ old('status', 'active') == 'active' ? 'selected' : '' }}>Active</option>
+                  <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
                 </select>
+                @error('status')
+                  <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
               </div>
               <div class="col-md-6">
-                <label class="form-label">Image</label>
-                <input type="file" name="image" class="form-control">
+                <label for="image" class="form-label">Product Image</label>
+                <input type="file" name="image" id="image" class="form-control @error('image') is-invalid @enderror" 
+                       accept="image/jpeg,image/png,image/jpg,image/gif">
+                <div class="form-text">Max file size: 2MB. Supported formats: JPEG, PNG, JPG, GIF</div>
+                @error('image')
+                  <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
               </div>
               <div class="col-12">
-                <label class="form-label">Description</label>
-                <textarea name="description" class="form-control" rows="3"></textarea>
+                <label for="description" class="form-label">Description</label>
+                <textarea name="description" id="description" class="form-control @error('description') is-invalid @enderror" 
+                          rows="4" placeholder="Enter product description...">{{ old('description') }}</textarea>
+                @error('description')
+                  <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
               </div>
-              <div class="col-12 text-end">
-                <button type="submit" class="btn btn-primary">
-                  <i class="fas fa-save me-2"></i>Save Product
-                </button>
+              <div class="col-12">
+                <div class="d-flex justify-content-between">
+                  <div class="text-muted">
+                    <small>* Required fields</small>
+                  </div>
+                  <div>
+                    <a href="{{ route('admin.shop.index') }}" class="btn btn-secondary me-2">
+                      <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                      <i class="fas fa-save me-2"></i>Save Product
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </form>

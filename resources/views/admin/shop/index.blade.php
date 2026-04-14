@@ -95,6 +95,11 @@
           <h1 class="display-6 fw-bold">🛒 Shop Products</h1>
           <p class="text-muted">Manage your product inventory and stock</p>
         </div>
+        <div class="col-md-4 text-end">
+          <a href="{{ route('admin.shop.create') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Add New Product
+          </a>
+        </div>
       </div>
 
       {{-- Stats Cards --}}
@@ -375,7 +380,7 @@
         const statusText = document.querySelector('.status-text-' + productId);
         
         fetch(`/admin/shop/${productId}/toggle-status`, {
-          method: 'POST',
+          method: 'PATCH',
           headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
             'Content-Type': 'application/json',

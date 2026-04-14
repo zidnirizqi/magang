@@ -183,6 +183,14 @@ class ShopController extends Controller
         $product->status = $product->status == 'active' ? 'inactive' : 'active';
         $product->save();
 
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'status' => $product->status,
+                'message' => 'Product status updated successfully'
+            ]);
+        }
+
         return redirect()->back()
             ->with('success', 'Product status updated successfully');
     }

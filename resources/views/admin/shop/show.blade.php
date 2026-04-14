@@ -170,7 +170,7 @@
                   <i class="fas fa-edit me-2"></i>Edit Product
                 </a>
                 
-                <form action="{{ route('admin.shop.toggleStatus', $product) }}" method="POST" class="d-inline">
+                <form action="{{ route('admin.shop.toggle-status', $product) }}" method="POST" class="d-inline">
                   @csrf
                   @method('PATCH')
                   <button type="submit" class="btn {{ $product->status == 'active' ? 'btn-secondary' : 'btn-success' }}">
