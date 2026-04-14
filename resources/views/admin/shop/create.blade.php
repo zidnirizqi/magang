@@ -25,7 +25,7 @@
     <a href="{{ route('dashboard') }}">🏠 Dashboard</a>
     <a href="{{ route('admin.shop.index') }}" class="active">🛒 Shop Product</a>
     <a href="{{ route('admin.category.index') }}">📂 Category</a>
-    <a href="{{ route('admin.user.index') }}">👤 Users</a>
+    <a href="{{ route('admin.user.index') }}">👤 My Account</a>
     <a href="{{ route('admin.profile.index') }}">⚙️ Profile</a>
     
     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="mt-3">

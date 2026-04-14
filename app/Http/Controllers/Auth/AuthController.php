@@ -52,9 +52,8 @@ class AuthController extends Controller
         $data = $request->all();
         $user = $this->create($data);
 
-        Auth::login($user);
-
-        return redirect("dashboard")->with('success', 'Great! You have Successfully registered');
+        // Tidak langsung login, redirect ke halaman login
+        return redirect("login")->with('success', 'Registration successful! Please login with your credentials.');
     }
  
     public function dashboard()
@@ -72,6 +71,7 @@ class AuthController extends Controller
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
+            'role' => 'admin', // default role admin
         ]);
     }
 

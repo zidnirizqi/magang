@@ -61,8 +61,13 @@ Route::middleware(['auth'])->group(function () {
         // Route::put('/brand/{id}', [BrandController::class, 'update'])->name('brand.update');
         // Route::delete('/brand/{id}', [BrandController::class, 'destroy'])->name('brand.destroy');
 
-        // Users (pakai resource biar lengkap CRUD)
-        Route::resource('user', UserController::class);
+        // Users (hanya view dan edit, tidak bisa create/add new)
+        Route::get('/user', [UserController::class, 'index'])->name('user.index');
+        Route::get('/user/{user}/edit', [UserController::class, 'edit'])->name('user.edit');
+        Route::put('/user/{user}', [UserController::class, 'update'])->name('user.update');
+        Route::delete('/user/{user}', [UserController::class, 'destroy'])->name('user.destroy');
+        // Route::get('/user/create', [UserController::class, 'create'])->name('user.create'); // DISABLED
+        // Route::post('/user', [UserController::class, 'store'])->name('user.store'); // DISABLED
 
         // Profile
         Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');

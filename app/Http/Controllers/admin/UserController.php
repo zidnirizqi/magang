@@ -11,58 +11,61 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::all(); // ambil semua user
+        // Hanya tampilkan akun user yang sedang login
+        $users = User::where('id', auth()->id())->get();
         return view('admin.users.index', compact('users'));
     }
 
     public function create()
     {
-        return view('admin.users.create');
+        // Disable create functionality
+        return redirect()->route('admin.user.index')->with('error', 'Adding new users is not allowed');
     }
 
     public function store(Request $request)
     {
-        $request->validate([ 
-            'name'  => 'required',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6'
-        ]);
-
-        User::create([
-            'name'  => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
-
-        return redirect()->route('admin.user.index')->with('success', 'Users created successfully');
+        // Disable store functionality
+        return redirect()->route('admin.user.index')->with('error', 'Adding new users is not allowed');
     }
 
     public function edit(User $user)
     {
+        // Hanya bisa edit akun sendiri
+        if ($user->id !== auth()->id()) {
+            return redirect()->route('admin.user.index')->with('error', 'You can only edit your own account');
+        }
+        
         return view('admin.users.edit', compact('user'));
     }
 
     public function update(Request $request, User $user)
     {
+        // Hanya bisa update akun sendiri
+        if ($user->id !== auth()->id()) {
+            return redirect()->route('admin.user.index')->with('error', 'You can only edit your own account');
+        }
+
         $request->validate([
-            'name'  => 'required',
+            'name'  => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'password' => 'nullable|min:6'
         ]);
 
         $data = $request->only(['name', 'email']);
+        $data['role'] = 'admin'; // pastikan role tetap admin
+        
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
         }
 
         $user->update($data);
 
-        return redirect()->route('admin.user.index')->with('success', 'Users updated successfully');
+        return redirect()->route('admin.user.index')->with('success', 'Your account updated successfully');
     }
 
     public function destroy(User $user)
     {
-        $user->delete();
-        return redirect()->route('admin.user.index')->with('success', 'Users deleted successfully');
+        // Tidak bisa menghapus akun sendiri atau akun orang lain
+        return redirect()->route('admin.user.index')->with('error', 'Account deletion is not allowed');
     }
 }

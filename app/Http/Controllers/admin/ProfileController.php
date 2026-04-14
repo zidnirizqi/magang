@@ -10,30 +10,21 @@ class ProfileController extends Controller
 {
     public function index()
     {
-        // ambil user yang sedang login
         $user = Auth::user();
         return view('admin.profile.index', compact('user'));
     }
 
     public function edit()
     {
-        $user = Auth::user();
-        return view('admin.profile.edit', compact('user'));
+        // Redirect back to index since editing is not allowed
+        return redirect()->route('admin.profile.index')
+            ->with('info', 'Profile information is read-only and cannot be edited');
     }
 
     public function update(Request $request)
     {
-        $user = Auth::user();
-
-        // validasi sederhana
-        $request->validate([
-            'name' => 'required|string|max:100',
-            'email' => 'required|email',
-        ]);
-
-        $user->name = $request->name;
-        $user->email = $request->email;
-
-        return redirect()->route('admin.profile.index')->with('success', 'Profile updated successfully');
+        // Redirect back to index since updating is not allowed
+        return redirect()->route('admin.profile.index')
+            ->with('info', 'Profile information is read-only and cannot be edited');
     }
 }
